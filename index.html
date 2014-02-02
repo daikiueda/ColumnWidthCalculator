@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja"">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>Column Width Calculator</title>
+		
+		<style>
+			#result ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			#result ul li {
+				margin: 0 0 40px 0;
+				padding: 0;
+			}
+			#result div.sample:after {
+				content: "";
+				clear: both;
+				display: block;
+			}
+			#result div.sample > div {
+				float: left;
+				height: 200px;
+				background: #000;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Column Width Calculator</h1>
+		
+		<section id="condition">
+			<h2>Condition</h2>
+			<form>
+				<dl>
+					<dt>Total width</dt>
+					<dd><input type="text" value="960" class="totalWidth"> px</dd>
+					
+					<dt>Columns</dt>
+					<dd><input type="text" value="4" class="columns"> cols</dd>
+				</dl>
+				<p class="submit"><input type="submit" value="calc"></p>
+			</form>
+		</section>
+		
+		<section id="result">
+			<h2>Result</h2>
+			<ul></ul>
+			<!-- table>
+				<thead>
+					<tr>
+						<th>Column Width</th>
+						<th>Margin</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th>-</th>
+						<td>-</td>
+					</tr>
+				</tbody>
+			</table -->
+		</section>
+		
+		<script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script>
+			( function(){
+				function calcColumnWidth( event ){
+					event.preventDefault();
+					var resultsContainer = $( "#result ul" );
+					    totalWidth = $( "#condition input.totalWidth" ).val() - 0,
+					    columns = $( "#condition input.columns" ).val() - 0,
+					    garters = columns - 1,
+					    results = [];
+					
+					resultsContainer.empty();
+					
+					if( !totalWidth || !columns || !garters ){
+						showError( "入力値が不正です．" );
+						return;
+					}
+					
+					for( var garterWidth = 0, last = totalWidth; garterWidth <= last; garterWidth++ ){
+						var columnWidth = ( totalWidth - ( garters * garterWidth ) ) / columns;
+						
+						if( columnWidth < garterWidth || columnWidth < 1 ){
+							break;
+						}
+						
+						if( columnWidth === parseInt( columnWidth, 10 ) ){
+							results.push( [ columnWidth, garterWidth ] );
+						}
+					}
+					
+					if( results.length === 0 ){
+						showError( "実現不能な条件です．" );
+						return;
+					}
+					
+					for( var i = 0, last = results.length; i < last; i++ ){
+						$( "<li></li>" )
+							.append( generateSample( totalWidth, columns, results[ i ][ 0 ], results[ i ][ 1 ] ) )
+							.appendTo( resultsContainer );
+						
+					}
+				}
+				
+				function generateSample( totalWidth, columns, columnWidth, garterWidth ){
+					var container = $( '<div class="sample"></div>' ).css( "width", totalWidth );
+					
+					$( '<p></p>' )
+						.html( [
+							'Column Width : ', columnWidth, 'px ( x ', columns ,' = ', columnWidth * columns ,'px )<br>',
+							'Garter Width : ', garterWidth, 'px ( x ', columns - 1 ,' = ', garterWidth * ( columns - 1 ) ,'px )'
+						].join( "" ) )
+						.appendTo( container );
+
+					for( var i = 0; i < columns; i++ ){
+						$( '<div></div>' )
+							.css( { width: columnWidth, marginLeft: ( i !== 0 )? garterWidth: 0 } )
+							.appendTo( container );
+					}
+					
+					return container;
+				}
+				
+				function showError( message ){
+					alert( "ERROR : " + message );
+				}
+				
+				$( document ).ready( function(){
+					$( "#condition form" ).on( "submit", calcColumnWidth );
+				} );
+			} )();
+		</script>
+	</body>
+</html>
